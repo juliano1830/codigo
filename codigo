@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn:process id="Processo_Solicitacao_Compra" name="Processo de Solicitação de Compra" isExecutable="true">
+
+    <!-- Início do Processo -->
+    <bpmn:startEvent id="Inicio" name="Início">
+      <bpmn:outgoing>Fluxo1</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <!-- Solicitação Interna de Compra -->
+    <bpmn:task id="Solicitacao_Interna_Compra" name="Solicitar Compra">
+      <bpmn:incoming>Fluxo1</bpmn:incoming>
+      <bpmn:outgoing>Fluxo2</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Realiza Cotações com Fornecedores -->
+    <bpmn:task id="Cotacoes_Fornecedores" name="Realizar Cotações">
+      <bpmn:incoming>Fluxo2</bpmn:incoming>
+      <bpmn:outgoing>Fluxo3</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Seleciona Melhor Fornecedor -->
+    <bpmn:task id="Selecao_Fornecedores" name="Selecionar Melhor Fornecedor">
+      <bpmn:incoming>Fluxo3</bpmn:incoming>
+      <bpmn:outgoing>Fluxo4</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Emite Ordem de Compra -->
+    <bpmn:task id="Emite_OC" name="Emitir Ordem de Compra">
+      <bpmn:incoming>Fluxo4</bpmn:incoming>
+      <bpmn:outgoing>Fluxo5</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Recebimento da Mercadoria -->
+    <bpmn:task id="Recebe_Mercadoria" name="Receber Mercadoria e Fatura">
+      <bpmn:incoming>Fluxo5</bpmn:incoming>
+      <bpmn:outgoing>Fluxo6</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Conferência da Mercadoria -->
+    <bpmn:exclusiveGateway id="Gateway_Conferencia" name="Mercadoria e Fatura Corretas?">
+      <bpmn:incoming>Fluxo6</bpmn:incoming>
+      <bpmn:outgoing>Fluxo7</bpmn:outgoing>
+      <bpmn:outgoing>Fluxo8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <!-- Caso de Mercadoria Correta -->
+    <bpmn:task id="Encaminha_Material" name="Encaminhar Material ao Solicitante">
+      <bpmn:incoming>Fluxo7</bpmn:incoming>
+      <bpmn:outgoing>Fluxo9</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Encaminha_Fatura" name="Encaminhar Fatura ao Financeiro">
+      <bpmn:incoming>Fluxo9</bpmn:incoming>
+      <bpmn:outgoing>Fluxo10</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Programa_Pagamento" name="Programar Pagamento ao Fornecedor">
+      <bpmn:incoming>Fluxo10</bpmn:incoming>
+      <bpmn:outgoing>Fluxo11</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Caso de Erro na Mercadoria ou Fatura -->
+    <bpmn:task id="Nao_Aceita_Mercadoria" name="Recusar Entrega">
+      <bpmn:incoming>Fluxo8</bpmn:incoming>
+      <bpmn:outgoing>Fluxo12</bpmn:outgoing>
+    </bpmn:task>
+
+    <bpmn:task id="Fornecedor_Recolhe" name="Fornecedor Recolhe Material">
+      <bpmn:incoming>Fluxo12</bpmn:incoming>
+      <bpmn:outgoing>Fluxo13</bpmn:outgoing>
+    </bpmn:task>
+
+    <!-- Fim do Processo -->
+    <bpmn:endEvent id="Fim" name="Fim">
+      <bpmn:incoming>Fluxo11</bpmn:incoming>
+      <bpmn:incoming>Fluxo13</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Fluxos -->
+    <bpmn:sequenceFlow id="Fluxo1" sourceRef="Inicio" targetRef="Solicitacao_Interna_Compra"/>
+    <bpmn:sequenceFlow id="Fluxo2" sourceRef="Solicitacao_Interna_Compra" targetRef="Cotacoes_Fornecedores"/>
+    <bpmn:sequenceFlow id="Fluxo3" sourceRef="Cotacoes_Fornecedores" targetRef="Selecao_Fornecedores"/>
+    <bpmn:sequenceFlow id="Fluxo4" sourceRef="Selecao_Fornecedores" targetRef="Emite_OC"/>
+    <bpmn:sequenceFlow id="Fluxo5" sourceRef="Emite_OC" targetRef="Recebe_Mercadoria"/>
+    <bpmn:sequenceFlow id="Fluxo6" sourceRef="Recebe_Mercadoria" targetRef="Gateway_Conferencia"/>
+    <bpmn:sequenceFlow id="Fluxo7" sourceRef="Gateway_Conferencia" targetRef="Encaminha_Material"/>
+    <bpmn:sequenceFlow id="Fluxo8" sourceRef="Gateway_Conferencia" targetRef="Nao_Aceita_Mercadoria"/>
+    <bpmn:sequenceFlow id="Fluxo9" sourceRef="Encaminha_Material" targetRef="Encaminha_Fatura"/>
+    <bpmn:sequenceFlow id="Fluxo10" sourceRef="Encaminha_Fatura" targetRef="Programa_Pagamento"/>
+    <bpmn:sequenceFlow id="Fluxo11" sourceRef="Programa_Pagamento" targetRef="Fim"/>
+    <bpmn:sequenceFlow id="Fluxo12" sourceRef="Nao_Aceita_Mercadoria" targetRef="Fornecedor_Recolhe"/>
+    <bpmn:sequenceFlow id="Fluxo13" sourceRef="Fornecedor_Recolhe" targetRef="Fim"/>
+
+  </bpmn:process>
+</bpmn:definitions>
